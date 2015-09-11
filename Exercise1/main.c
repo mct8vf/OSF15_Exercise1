@@ -14,11 +14,16 @@
 void run_commands (Commands_t* cmd, Matrix_t** mats, unsigned int num_mats);
 unsigned int find_matrix_given_name (Matrix_t** mats, unsigned int num_mats, 
 			const char* target);
-
+// TODO 19
 // TODO complete the defintion of this function. 
 void destroy_remaining_heap_allocations(Matrix_t **mats, unsigned int num_mats);
 
 	//TODO FUNCTION COMMENT
+	/*
+ * PURPOSE: Main function
+ * INPUTS:	int argc number of elements from command line **argv element specified in command line
+ * RETURN:	0 if able to exucute all of the code without error, -1 if otherwise
+ **/
 int main (int argc, char **argv) {
 	srand(time(NULL));		
 	char *line = NULL;
@@ -28,8 +33,12 @@ int main (int argc, char **argv) {
 	memset(&mats,0, sizeof(Matrix_t*) * 10); // IMPORTANT C FUNCTION TO LEARN
 
 	Matrix_t *temp = NULL;
-	create_matrix (&temp,"temp_mat", 5, 5); // TODO ERROR CHECK
+	create_matrix(&temp,"temp_mat", 5, 5); // TODO ERROR CHECK
+	if(!create_matrix(&temp,"temp_mat", 5, 5))
+		return -1;
 	add_matrix_to_array(mats,temp, 10); //TODO ERROR CHECK NEEDED
+	if(add_matrix_to_array(mats,temp, 10)==-1)
+		return -1;
 	int mat_idx = find_matrix_given_name(mats,10,"temp_mat");
 
 	if (mat_idx < 0) {
@@ -38,7 +47,8 @@ int main (int argc, char **argv) {
 	}
 	random_matrix(mats[mat_idx], 10, 15);
 	write_matrix("temp_mat", mats[mat_idx]); // TODO ERROR CHECK
-
+	if(!write_matrix("temp_mat", mats[mat_idx]))
+		return -1;
 	line = readline("> ");
 	while (strncmp(line,"exit", strlen("exit")  + 1) != 0) {
 		
@@ -61,9 +71,15 @@ int main (int argc, char **argv) {
 }
 
 	//TODO FUNCTION COMMENT
+	/*
+ * PURPOSE: Determine what action to execute based on the command
+ * INPUTS:	cmd command to be executed, mats list of matricies, num_mats number of matricies
+ * RETURN:	None
+ **/
 void run_commands (Commands_t* cmd, Matrix_t** mats, unsigned int num_mats) {
 	//TODO ERROR CHECK INCOMING PARAMETERS
-
+	if((!cmd)||(!mats))
+		return;
 
 	/*Parsing and calling of commands*/
 	if (strncmp(cmd->cmds[0],"display",strlen("display") + 1) == 0
@@ -91,7 +107,8 @@ void run_commands (Commands_t* cmd, Matrix_t** mats, unsigned int num_mats) {
 				}
 			
 				add_matrix_to_array(mats,c, num_mats); //TODO ERROR CHECK NEEDED
-
+				if(add_matrix_to_array(mats,c, num_mats)==-1)
+					return;
 
 				if (! add_matrices(mats[mat1_idx], mats[mat2_idx],c) ) {
 					printf("Failure to add %s with %s into %s\n", mats[mat1_idx]->name, mats[mat2_idx]->name,c->name);
@@ -109,7 +126,11 @@ void run_commands (Commands_t* cmd, Matrix_t** mats, unsigned int num_mats) {
 					return;
 				}
 				duplicate_matrix (mats[mat1_idx], dup_mat); //TODO ERROR CHECK NEEDED
+				if(!duplicate_matrix (mats[mat1_idx], dup_mat))
+					return;
 				add_matrix_to_array(mats,dup_mat,num_mats); //TODO ERROR CHECK NEEDED
+				if(add_matrix_to_array(mats,dup_mat,num_mats)==-1)
+					return;
 				printf ("Duplication of %s into %s finished\n", mats[mat1_idx]->name, cmd->cmds[2]);
 		}
 		else {
@@ -140,6 +161,8 @@ void run_commands (Commands_t* cmd, Matrix_t** mats, unsigned int num_mats) {
 		const int shift_value = atoi(cmd->cmds[3]);
 		if (mat1_idx >= 0 ) {
 			bitwise_shift_matrix(mats[mat1_idx],cmd->cmds[2][0], shift_value); //TODO ERROR CHECK NEEDED
+			if(!bitwise_shift_matrix(mats[mat1_idx],cmd->cmds[2][0], shift_value))
+				return;
 			printf("Matrix (%s) has been shifted by %d\n", mats[mat1_idx]->name, shift_value);
 		}
 		else {
@@ -157,6 +180,8 @@ void run_commands (Commands_t* cmd, Matrix_t** mats, unsigned int num_mats) {
 		}	
 		
 		add_matrix_to_array(mats,new_matrix, num_mats); //TODO ERROR CHECK NEEDED
+		if(add_matrix_to_array(mats,new_matrix, num_mats)==-1)
+			return;
 		printf("Matrix (%s) is read from the filesystem\n", cmd->cmds[1]);	
 	}
 	else if (strncmp(cmd->cmds[0],"write",strlen("write") + 1) == 0
@@ -177,7 +202,11 @@ void run_commands (Commands_t* cmd, Matrix_t** mats, unsigned int num_mats) {
 		const unsigned int cols = atoi(cmd->cmds[3]);
 
 		create_matrix(&new_mat,cmd->cmds[1],rows, cols); //TODO ERROR CHECK NEEDED
+		if(!create_matrix(&new_mat,cmd->cmds[1],rows, cols))
+			return;
 		add_matrix_to_array(mats,new_mat,num_mats); // TODO ERROR CHECK NEEDED
+		if(add_matrix_to_array(mats,new_matrix, num_mats)==-1)
+			return;
 		printf("Created Matrix (%s,%u,%u)\n", new_mat->name, new_mat->rows, new_mat->cols);
 	}
 	else if (strncmp(cmd->cmds[0], "random", strlen("random") + 1) == 0
@@ -186,7 +215,8 @@ void run_commands (Commands_t* cmd, Matrix_t** mats, unsigned int num_mats) {
 		const unsigned int start_range = atoi(cmd->cmds[2]);
 		const unsigned int end_range = atoi(cmd->cmds[3]);
 		random_matrix(mats[mat1_idx],start_range, end_range); //TODO ERROR CHECK NEEDED
-
+		if(!random_matrix(mats[mat1_idx],start_range, end_range))
+			return;
 		printf("Matrix (%s) is randomized between %u %u\n", mats[mat1_idx]->name, start_range, end_range);
 	}
 	else {
@@ -196,8 +226,14 @@ void run_commands (Commands_t* cmd, Matrix_t** mats, unsigned int num_mats) {
 }
 
 	//TODO FUNCTION COMMENT
+	/*
+ * PURPOSE: Search through array of matricies for a specific name
+ * INPUTS:	Array of matricies mats to be searched, number of matricies in array num_mats, name being searched for target
+ * RETURN:	index i if target is found, -1 if otherwise
+ **/
 unsigned int find_matrix_given_name (Matrix_t** mats, unsigned int num_mats, const char* target) {
 	//TODO ERROR CHECK INCOMING PARAMETERS
+	if((!mats)||(!target))
 
 	for (int i = 0; i < num_mats; ++i) {
 		if (strncmp(mats[i]->name,target,strlen(mats[i]->name)) == 0) {
@@ -208,9 +244,23 @@ unsigned int find_matrix_given_name (Matrix_t** mats, unsigned int num_mats, con
 }
 
 	//TODO FUNCTION COMMENT
+	/*
+ * PURPOSE:	Free memory allocated for matricies in list
+ * INPUTS:	list of matricies to be freed mats, number of matricies in list
+ * RETURN:	None
+ **/
 void destroy_remaining_heap_allocations(Matrix_t **mats, unsigned int num_mats) {
 	
 	//TODO ERROR CHECK INCOMING PARAMETERS
+	if(!mats)
+		return;
 
 	// COMPLETE MISSING MEMORY CLEARING HERE
+	for(int i=0; i<num_mats; i++)
+	{
+		free((mats[i])->data);
+		free(mats[i]);
+	}
+	free(mats);
+	mats=NULL;
 }
